@@ -5,6 +5,57 @@
         <script src="/socket.io/socket.io.js"></script>
         <script>
 
+            var leds = [
+            { addr: 3, port: 2 },
+            { addr: 3, port: 3 },
+            { addr: 3, port: 4 },
+            { addr: 3, port: 5 },
+            { addr: 3, port: 6 },
+            { addr: 3, port: 7 },
+            { addr: 3, port: 8 },
+            { addr: 3, port: 9 },
+            { addr: 3, port: 10 },
+            { addr: 3, port: 11 },
+            { addr: 3, port: 12 },
+            { addr: 3, port: 13 },
+            { addr: 3, port: 14 },
+            { addr: 3, port: 15 },
+            { addr: 3, port: 16 },
+            { addr: 3, port: 17 },
+            { addr: 4, port: 2 },
+            { addr: 4, port: 3 },
+            { addr: 4, port: 4 },
+            { addr: 4, port: 5 },
+            { addr: 4, port: 6 },
+            { addr: 4, port: 7 },
+            { addr: 4, port: 8 },
+            { addr: 4, port: 9 },
+            { addr: 4, port: 10 },
+            { addr: 4, port: 11 },
+            { addr: 4, port: 12 },
+            { addr: 4, port: 13 },
+            { addr: 4, port: 14 },
+            { addr: 4, port: 15 },
+            { addr: 4, port: 16 },
+            { addr: 4, port: 17 },
+            { addr: 5, port: 2 },
+            { addr: 5, port: 3 },
+            { addr: 5, port: 4 },
+            { addr: 5, port: 5 },
+            { addr: 5, port: 6 },
+            { addr: 5, port: 7 },
+            { addr: 5, port: 8 },
+            { addr: 5, port: 9 },
+            { addr: 5, port: 10 },
+            { addr: 5, port: 11 },
+            { addr: 5, port: 12 },
+            { addr: 5, port: 13 },
+            { addr: 5, port: 14 },
+            { addr: 5, port: 15 },
+            { addr: 5, port: 16 },
+            { addr: 5, port: 17 }
+            ];
+
             var socket = io();
 
 
@@ -44,11 +95,30 @@
                 }
             }
 
+            var previndex = 0;
+
+            function setled(index) {
+                var led = leds[index];
+                socket.emit('led', { addr: led.addr, port: led.port, val: 1 });
+                var prevled = leds[previndex];
+                socket.emit('led', { addr: prevled.addr, port: prevled.port, val: 0 });
+                previndex = index;
+            }
+
             window.addEventListener('load', function() {
             });
         </script>
+        <style>
+            button { font-size: 40px; }
+            input { width: 100%; margin: 40px 0; }
+        </style>
     </head>
     <body>
-        <button onclick="toggleLauflicht()">Lauflicht</button>
+        <div>
+            <button onclick="toggleLauflicht()">Lauflicht</button>
+        </div>
+        <div>
+            <input type="range" min="0" max="47" oninput="setled(this.value);"/>
+        </div>
     </body>
 </html>
