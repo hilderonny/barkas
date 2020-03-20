@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+
+            var socket = io();
+
+
+            var onidx = 2;
+            var offidx = 1;
+            var onaddr = 3;
+            var offaddr = 3;
+
+            function lauflicht() {
+                onidx += 1;
+                if (onidx > 17) {
+                    onidx = 2;
+                    onaddr += 1;
+                    if (onaddr > 5) {
+                        onaddr = 3;
+                    }
+                }
+                socket.emit('led', { addr: onaddr, port: onidx, val: 1 });
+                offidx += 1;
+                if (offidx > 17) {
+                    offidx = 2;
+                    offaddr += 1;
+                    if (offaddr > 5) {
+                        offaddr = 3;
+                    }
+                }
+                socket.emit('led', { addr: offaddr, port: offidx, val: 0 });
+            }
+
+            var ll;
+            function toggleLauflicht() {
+                if (ll) {
+                    clearInterval(ll);
+                    ll = null;
+                } else {
+                    ll = setInterval(lauflicht, 50);
+                }
+            }
+
+            window.addEventListener('load', function() {
+            });
+        </script>
+    </head>
+    <body>
+        <button onclick="toggleLauflicht()">Lauflicht</button>
+    </body>
+</html>
