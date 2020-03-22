@@ -105,12 +105,23 @@
                 previndex = index;
             }
 
+            function setleddirect(index, on) {
+                var led = leds[index];
+                socket.emit('led', { addr: led.addr, port: led.port, val: (on ? 1 : 0) });
+            }
+
             window.addEventListener('load', function() {
+                var div = document.createElement('div');
+                for (var i = 0; i < leds.length; i++) {
+                    var led = leds[i];
+                    div.innerHTML += '<p><label>' + (i+1) + ': ' + led.addr + '/' + led.port + '<input type="checkbox" value="1" onchange="setleddirect(' + i + ',this.checked);"/></label></p>';
+                }
+                document.body.appendChild(div);
             });
         </script>
         <style>
             button { font-size: 40px; }
-            input { width: 100%; margin: 40px 0; }
+            input[type=range] { width: 100%; margin: 40px 0; }
         </style>
     </head>
     <body>
