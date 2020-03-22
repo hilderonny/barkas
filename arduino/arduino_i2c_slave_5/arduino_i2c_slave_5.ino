@@ -16,7 +16,7 @@ void receiveEvent(int howMany){
   while(Wire.available())
   {
     int val = Wire.read();
-    int idx = val >> 4;
+    int idx = val >> 3;
     int on = val & 1;
     digitalWrite(idx, on);
   }
