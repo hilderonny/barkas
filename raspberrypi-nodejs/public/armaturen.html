@@ -22,38 +22,6 @@
             { addr: 3, port: 15 },
             { addr: 3, port: 16 },
             { addr: 3, port: 17 },
-            { addr: 4, port: 2 },
-            { addr: 4, port: 3 },
-            { addr: 4, port: 4 },
-            { addr: 4, port: 5 },
-            { addr: 4, port: 6 },
-            { addr: 4, port: 7 },
-            { addr: 4, port: 8 },
-            { addr: 4, port: 9 },
-            { addr: 4, port: 10 },
-            { addr: 4, port: 11 },
-            { addr: 4, port: 12 },
-            { addr: 4, port: 13 },
-            { addr: 4, port: 14 },
-            { addr: 4, port: 15 },
-            { addr: 4, port: 16 },
-            { addr: 4, port: 17 },
-            { addr: 5, port: 2 },
-            { addr: 5, port: 3 },
-            { addr: 5, port: 4 },
-            { addr: 5, port: 5 },
-            { addr: 5, port: 6 },
-            { addr: 5, port: 7 },
-            { addr: 5, port: 8 },
-            { addr: 5, port: 9 },
-            { addr: 5, port: 10 },
-            { addr: 5, port: 11 },
-            { addr: 5, port: 12 },
-            { addr: 5, port: 13 },
-            { addr: 5, port: 14 },
-            { addr: 5, port: 15 },
-            { addr: 5, port: 16 },
-            { addr: 5, port: 17 }
             ];
 
             var socket = io();
@@ -61,28 +29,18 @@
 
             var onidx = 2;
             var offidx = 1;
-            var onaddr = 3;
-            var offaddr = 3;
 
             function lauflicht() {
                 onidx += 1;
                 if (onidx > 17) {
                     onidx = 2;
-                    onaddr += 1;
-                    if (onaddr > 5) {
-                        onaddr = 3;
-                    }
                 }
-                socket.emit('led', { addr: onaddr, port: onidx, val: 1 });
+                socket.emit('led', { addr: 3, port: onidx, val: 1 });
                 offidx += 1;
                 if (offidx > 17) {
                     offidx = 2;
-                    offaddr += 1;
-                    if (offaddr > 5) {
-                        offaddr = 3;
-                    }
                 }
-                socket.emit('led', { addr: offaddr, port: offidx, val: 0 });
+                socket.emit('led', { addr: 3, port: offidx, val: 0 });
             }
 
             var ll;
@@ -91,7 +49,7 @@
                     clearInterval(ll);
                     ll = null;
                 } else {
-                    ll = setInterval(lauflicht, 50);
+                    ll = setInterval(lauflicht, 100);
                 }
             }
 
@@ -110,6 +68,12 @@
                 socket.emit('led', { addr: led.addr, port: led.port, val: (on ? 1 : 0) });
             }
 
+            function toggleled(index) {
+                var led = leds[index];
+                led.on = !led.on;
+                socket.emit('led', { addr: led.addr, port: led.port, val: (led.on ? 1 : 0) });
+            }
+
             window.addEventListener('load', function() {
                 var div = document.createElement('div');
                 for (var i = 0; i < leds.length; i++) {
@@ -122,11 +86,30 @@
         <style>
             button { font-size: 40px; }
             input[type=range] { width: 100%; margin: 40px 0; }
+            .image { width: 100%;position:relative; }
+            .image img { width: 100%; }
+            .image div { position:absolute;width:6%;height:12%;background-color: rgba(255,255,255,.4);border: 1px #fff solid; }
         </style>
     </head>
     <body>
-        <div>
-            <a href="armaturen.html">Armaturenbrett</a>
+        <div class="image">
+            <img src="armaturen.jpg"/>
+            <div style="top:49%;left:6%;" onclick="toggleled(0);"></div>
+            <div style="top:49%;left:31%;" onclick="toggleled(1);"></div>
+            <div style="top:62%;left:46%;" onclick="toggleled(2);"></div>
+            <div style="top:38%;left:68%;" onclick="toggleled(3);"></div>
+            <div style="top:49%;left:44%;" onclick="toggleled(4);"></div>
+            <div style="top:49%;left:50%;" onclick="toggleled(5);"></div>
+            <div style="top:51%;left:65%;" onclick="toggleled(6);"></div>
+            <div style="top:51%;left:71%;" onclick="toggleled(7);"></div>
+            <div style="top:20%;left:78%;" onclick="toggleled(8);"></div>
+            <div style="top:20%;left:86%;" onclick="toggleled(9);"></div>
+            <div style="top:48%;left:82%;" onclick="toggleled(10);"></div>
+            <div style="top:41%;left:88%;" onclick="toggleled(11);"></div>
+            <div style="top:64%;left:82%;" onclick="toggleled(12);"></div>
+            <div style="top:57%;left:88%;" onclick="toggleled(13);"></div>
+            <div style="top:79%;left:82%;" onclick="toggleled(14);"></div>
+            <div style="top:72%;left:88%;" onclick="toggleled(15);"></div>
         </div>
         <div>
             <button onclick="toggleLauflicht()">Lauflicht</button>
