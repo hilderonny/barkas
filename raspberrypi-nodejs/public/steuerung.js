@@ -1,6 +1,7 @@
 var Steuerung = (audioElement, leds) => {
 
     function handleAudioLevel(level) {
+        if (level <= 0) return;
         leds.forEach((led) => {
             socket.emit('led', { addr: led.addr, port: led.port, val: (level > led.audiolevel ? 1 : 0) });
         });
@@ -32,7 +33,7 @@ var Steuerung = (audioElement, leds) => {
                 }
             }
             //console.log(max, channelMaxes);
-            handleAudioLevel(channelMaxes[0]);
+            handleAudioLevel(channelMaxes[0] * volume);
         };
         audioElement.addEventListener('play', function() {
             audioCtx.resume();
@@ -43,7 +44,9 @@ var Steuerung = (audioElement, leds) => {
 
     var onidx = 1;
     var offidx = 0;
-    var llleds = leds.sort((a, b) => a.llidx - b.llidx);
+    var llleds = leds.slice().sort((a, b) => a.llidx - b.llidx);
+
+    var volume = 1;
 
     function lauflicht() {
         onidx += 1;
@@ -81,6 +84,17 @@ var Steuerung = (audioElement, leds) => {
             var led = leds[index];
             led.on = !led.on;
             socket.emit('led', { addr: led.addr, port: led.port, val: (led.on ? 1 : 0) });
+        },
+        loadFile: (file) => {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                audioElement.setAttribute('src', e.target.result);
+                audioElement.play();
+            }
+            reader.readAsDataURL(file);
+        },
+        setvolume: (vol) => {
+            volume = vol;
         },
     }
     
