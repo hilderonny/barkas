@@ -3,7 +3,7 @@ html, body { margin: 0; padding: 0; height: 100%; }
 body { display: flex; flex-direction: row; color: rgba(0,0,0,0.87); line-height: 1.6; font-size: 16px; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif; }
 a { color: #039be5; text-decoration: none; }
 code { padding: 2px 4px; color: #1f1f1f; background-color: #f2f2f2; border-radius: 4px; }
-pre { border: 1px solid #dfdfdf; }
+pre { border: 1px solid #dfdfdf; border-radius: 4px; }
 table { border-spacing: 0; }
 th { border-bottom: 1px solid #ccc; background-color: rgba(0,0,0,.03); }
 td, th { padding: 6px; vertical-align: top; }
