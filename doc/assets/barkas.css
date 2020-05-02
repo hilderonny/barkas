@@ -1,0 +1,3 @@
+a { color: rgb(0, 109, 204); }
+#sidebar::before { content: ""; background-image: url(barkas.jpg); width: 150px; height: 150px; background-size: contain; margin: 10px; border-radius: 8px; }
+h1, h2, h3, h4 { color: #5ba1c5; }
