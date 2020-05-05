@@ -110,6 +110,13 @@
                 socket.emit('led', { addr: led.addr, port: led.port, val: (on ? 1 : 0) });
             }
 
+            var schalterDiv;
+
+            async function schalterAbfragen() {
+                var schalter = await (await fetch('/inputs')).text();
+                schalterDiv.innerHTML = schalter;
+            }
+
             window.addEventListener('load', function() {
                 var div = document.createElement('div');
                 for (var i = 0; i < leds.length; i++) {
@@ -117,6 +124,8 @@
                     div.innerHTML += '<p><label>' + (i+1) + ': ' + led.addr + '/' + led.port + '<input type="checkbox" value="1" onchange="setleddirect(' + i + ',this.checked);"/></label></p>';
                 }
                 document.body.appendChild(div);
+                schalterDiv = document.getElementById('schalter');
+                setInterval(schalterAbfragen, 100);
             });
         </script>
         <style>
@@ -125,6 +134,7 @@
         </style>
     </head>
     <body>
+        <div id="schalter"></div>
         <div>
             <a href="armaturen.html">Armaturenbrett</a>
         </div>

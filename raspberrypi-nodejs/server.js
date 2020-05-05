@@ -22,6 +22,23 @@ httpsServer.listen(httpsPort, () => { // Start HTTPS server
     console.log(`HTTPS server is running at port ${httpsPort}.`);
 });
 
+// Schalter initialisieren
+var inputaddresses = [ 6 ]; // Armaturenbrettschalter an Adresse 6
+var inputs = {};
+setInterval(() => {
+    for (var inputaddress of inputaddresses) {
+        try {
+            inputs[inputaddress] = i2c.readWordSync(inputaddress);
+        } catch (ex) {
+            inputs[inputaddress] = -1; // Scheiße war's, der Mond schien helle. Keine Verbindung zum Arduino
+        }
+    }
+}, 50);
+app.use('/inputs', (_, res) => { // Eingangswerte einfach zurück geben an URL /inputs
+    res.send(JSON.stringify(inputs));
+});
+
+// Websockets initialisieren
 var io = socketio.listen(httpsServer);
 io.on('connection', (socket) => {
     // Handle incoming messages with tag "Message"
@@ -36,3 +53,4 @@ io.on('connection', (socket) => {
         console.log(`Socket ${socket.id} disconnected.`);
     });
 });
+
