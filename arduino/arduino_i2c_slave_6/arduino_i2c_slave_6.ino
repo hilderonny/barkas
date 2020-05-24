@@ -93,6 +93,7 @@ byte blinkRechts = 0;
 byte abblendlicht = 0;
 byte fernlicht = 0;
 byte fernlichttrigger = 0;
+bool ichkontrolliere = true;
 
 byte EINGAENGE[18];
 byte ARMATUREN[18];
@@ -203,18 +204,23 @@ void verarbeiteEingaenge() {
   ARMATUREN[O_A_HECKSCHEIBENHEIZUNG] = EINGAENGE[I_HECKSCHEIBENHEIZUNG];
   // Handbremse
   ARMATUREN[O_A_HANDBREMSE] = EINGAENGE[I_HANDBREMSE];
+  // Raspi-Symbol ausschalten, ich kontrolliere ja
+  ARMATUREN[O_A_RASPBERRYPI] = 0;
 }
 
 void setup() {
   //Wire.begin(); // Als Master initialisieren
   Wire.begin(SCHALTER_ADDR); // Als Slave initialisieren
+  Wire.onReceive(receiveEvent); // Auf Nachrichten vom Master warten
   for (int i = 0; i < 18; i++) pinMode(i, INPUT_PULLUP); // Eingänge definieren
-  //Serial.begin(9600);
-  //Serial.println("I2C Daten");
+  Serial.begin(9600);
+  Serial.println("I2C Daten");
 }
 
 void loop() {
   delay(DELAY);
+  if (!ichkontrolliere) return; // Raspi hat die Steuerung
+  Serial.println("ICH");
 
   // Eingänge lesen
   for (int i = 0; i < 18; i++) {
@@ -235,4 +241,14 @@ void loop() {
   sendToVorn();
   sendToHinten();
   sendToArmaturen();
+}
+
+void receiveEvent(int howMany){
+  Serial.println("Daten empfangen");
+  int val = 0;
+  while(Wire.available()) // Es kommen immer 2 Bytes, das letzte ist wichtig
+  {
+    val = Wire.read();
+  }
+  ichkontrolliere = val < 1;
 }
