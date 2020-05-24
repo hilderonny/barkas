@@ -213,14 +213,14 @@ void setup() {
   Wire.begin(SCHALTER_ADDR); // Als Slave initialisieren
   Wire.onReceive(receiveEvent); // Auf Nachrichten vom Master warten
   for (int i = 0; i < 18; i++) pinMode(i, INPUT_PULLUP); // Eingänge definieren
-  Serial.begin(9600);
-  Serial.println("I2C Daten");
+  //Serial.begin(9600);
+  //Serial.println("I2C Daten");
 }
 
 void loop() {
   delay(DELAY);
   if (!ichkontrolliere) return; // Raspi hat die Steuerung
-  Serial.println("ICH");
+  //Serial.println("ICH");
 
   // Eingänge lesen
   for (int i = 0; i < 18; i++) {
@@ -244,7 +244,7 @@ void loop() {
 }
 
 void receiveEvent(int howMany){
-  Serial.println("Daten empfangen");
+  //Serial.println("Daten empfangen");
   int val = 0;
   while(Wire.available()) // Es kommen immer 2 Bytes, das letzte ist wichtig
   {
