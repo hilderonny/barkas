@@ -63,6 +63,8 @@ var Steuerung = (audioElement, leds) => {
         socket.emit('led', { addr: offled.addr, port: offled.port, val: 0 });
     }
 
+    var raspicontrols = false;
+
     var ll;
 
     initAudio();
@@ -75,6 +77,10 @@ var Steuerung = (audioElement, leds) => {
             } else {
                 ll = setInterval(lauflicht, 100);
             }
+        },
+        toggleraspicontrol: () => {
+            raspicontrols = !raspicontrols;
+            socket.emit(raspicontrols ? 'takeover' : 'letarduinocontrol');
         },
         setleddirect: (index, on) => {
             var led = leds[index];

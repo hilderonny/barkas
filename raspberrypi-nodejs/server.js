@@ -22,22 +22,6 @@ httpsServer.listen(httpsPort, () => { // Start HTTPS server
     console.log(`HTTPS server is running at port ${httpsPort}.`);
 });
 
-// Schalter initialisieren
-var inputaddresses = [ 6 ]; // Armaturenbrettschalter an Adresse 6
-var inputs = {};
-setInterval(() => {
-    for (var inputaddress of inputaddresses) {
-        try {
-            inputs[inputaddress] = i2c.readWordSync(inputaddress);
-        } catch (ex) {
-            inputs[inputaddress] = -1; // Scheiße war's, der Mond schien helle. Keine Verbindung zum Arduino
-        }
-    }
-}, 50);
-app.use('/inputs', (_, res) => { // Eingangswerte einfach zurück geben an URL /inputs
-    res.send(JSON.stringify(inputs));
-});
-
 // Websockets initialisieren
 var io = socketio.listen(httpsServer);
 io.on('connection', (socket) => {
@@ -47,6 +31,17 @@ io.on('connection', (socket) => {
         // data.port = 2 .. 16
         // data.val = 0/1, theoretisch 0..7
         i2c.writeByte(data.addr, 0x00, (data.port << 3) | data.val);
+    });
+    // Raspi soll Steuerung übernehmen
+    socket.on('takeover', () => {
+        i2c.writeByte(0x06, 0x00, 0x01);
+        i2c.writeByte(0x03, 0x00, (12 << 3) | 1); // Raspi-Symbol einschalten
+        console.log('takeover');
+    });
+    // Arduino soll steuern
+    socket.on('letarduinocontrol', () => {
+        i2c.writeByte(0x06, 0x00, 0x00);
+        console.log('letarduinocontrol');
     });
     console.log(`Socket ${socket.id} connected.`);
     socket.on('disconnect', () => {
