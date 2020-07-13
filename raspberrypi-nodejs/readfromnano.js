@@ -13,7 +13,8 @@ var inputs = {};
 setInterval(() => {
     for (var inputaddress of inputaddresses) {
         try {
-            inputs[inputaddress] = i2c.readWordSync(inputaddress);
+            // Der 6er Arduino sendet nur die ersten 16 Eingänge an den Raspi
+            inputs[inputaddress] = (i2c.readWordSync(inputaddress)).toString(2).padStart(16, '0');
         } catch (ex) {
             inputs[inputaddress] = -1; // Scheiße war's, der Mond schien helle. Keine Verbindung zum Arduino
         }
