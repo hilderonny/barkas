@@ -1,5 +1,7 @@
 #include <Wire.h>
 
+const bool USE_SERIAL = false; // Auf true setzen, um Serielle Ausgabe zu aktivieren
+
 /**
  * Armaturenbrettschalter als Master.
  * 
@@ -212,22 +214,23 @@ void setup() {
   //Wire.begin(); // Als Master initialisieren
   Wire.begin(SCHALTER_ADDR); // Als Slave initialisieren
   Wire.onReceive(receiveEvent); // Auf Nachrichten vom Master warten
+  Wire.onRequest(requestEvent); // Wenn Master Daten abfragt
   for (int i = 0; i < 18; i++) pinMode(i, INPUT_PULLUP); // Eingänge definieren
-  //Serial.begin(9600);
-  //Serial.println("I2C Daten");
+  if (USE_SERIAL) Serial.begin(9600);
+  if (USE_SERIAL) Serial.println("I2C Daten");
 }
 
 void loop() {
   delay(DELAY);
   if (!ichkontrolliere) return; // Raspi hat die Steuerung
-  //Serial.println("ICH");
+  if (USE_SERIAL) Serial.println("ICH");
 
   // Eingänge lesen
   for (int i = 0; i < 18; i++) {
     EINGAENGE[i] = 1 - digitalRead(i);
-    //Serial.print(EINGAENGE[i]);
+    if (USE_SERIAL) Serial.print(EINGAENGE[i]);
   }
-  //Serial.println("");
+  if (USE_SERIAL) Serial.println("");
   verarbeiteEingaenge();
 
   // Blinktakter
@@ -251,4 +254,17 @@ void receiveEvent(int howMany){
     val = Wire.read();
   }
   ichkontrolliere = val < 1;
+}
+
+void requestEvent() {
+  int b = 0;
+  for (int i = 0; i < 8; i++) {
+    b |= EINGAENGE[i] << i;
+  }
+  Wire.write(b);
+  b = 0;
+  for (int i = 8; i < 16; i++) {
+    b |= EINGAENGE[i] << (i - 8);
+  }
+  Wire.write(b);
 }
