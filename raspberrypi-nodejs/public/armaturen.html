@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="https://assets.rpy.xyz/web-audio-peak-meter.min.js"></script>
+        <script>
+
+            function handleAudioLevel(level) {
+                setleddirect(4, level > .1);
+                setleddirect(5, level > .2);
+                setleddirect(6, level > .3);
+                setleddirect(7, level > .4);
+                setleddirect(14, level > .5);
+                setleddirect(15, level > .6);
+                setleddirect(12, level > .7);
+                setleddirect(13, level > .8);
+                setleddirect(10, level > .85);
+                setleddirect(11, level > .9);
+                setleddirect(8, level > .95);
+                setleddirect(9, level > 1);
+            }
+
+            function initAudio() {
+                // https://esonderegger.github.io/web-audio-peak-meter/
+                var myAudio = document.getElementById('musik');
+                var audioCtx = new window.AudioContext();
+                var sourceNode = audioCtx.createMediaElementSource(myAudio);
+                sourceNode.connect(audioCtx.destination);
+                var meterNode = webAudioPeakMeter.createMeterNode(sourceNode, audioCtx);
+                var max = 0;
+                meterNode.onaudioprocess = function(audioProcessingEvent) {
+                    var inputBuffer = audioProcessingEvent.inputBuffer;
+                    var i;
+                    var channelData = [];
+                    var channelMaxes = [];
+                    for (i = 0; i < meterNode.channelCount; i++) {
+                    channelData[i] = inputBuffer.getChannelData(i);
+                    channelMaxes[i] = 0.0;
+                    }
+                    for (var sample = 0; sample < inputBuffer.length; sample++) {
+                        for (i = 0; i < meterNode.channelCount; i++) {
+                            var s = Math.abs(channelData[i][sample]);
+                            if (s > channelMaxes[i]) {
+                                channelMaxes[i] = s;
+                            }
+                            if (s > max) max = s;
+                        }
+                    }
+                    //console.log(max, channelMaxes);
+                    handleAudioLevel(channelMaxes[0]);
+                };
+                myAudio.addEventListener('play', function() {
+                    audioCtx.resume();
+                });
+            }
+
+            
+
+            var leds = [
+            { addr: 3, port: 2 },
+            { addr: 3, port: 3 },
+            { addr: 3, port: 4 },
+            { addr: 3, port: 5 },
+            { addr: 3, port: 6 },
+            { addr: 3, port: 7 },
+            { addr: 3, port: 8 },
+            { addr: 3, port: 9 },
+            { addr: 3, port: 10 },
+            { addr: 3, port: 11 },
+            { addr: 3, port: 12 },
+            { addr: 3, port: 13 },
+            { addr: 3, port: 14 },
+            { addr: 3, port: 15 },
+            { addr: 3, port: 16 },
+            { addr: 3, port: 17 },
+            ];
+
+            var socket = io();
+
+
+            var onidx = 2;
+            var offidx = 1;
+
+            function lauflicht() {
+                onidx += 1;
+                if (onidx > 17) {
+                    onidx = 2;
+                }
+                socket.emit('led', { addr: 3, port: onidx, val: 1 });
+                offidx += 1;
+                if (offidx > 17) {
+                    offidx = 2;
+                }
+                socket.emit('led', { addr: 3, port: offidx, val: 0 });
+            }
+
+            var ll;
+            function toggleLauflicht() {
+                if (ll) {
+                    clearInterval(ll);
+                    ll = null;
+                } else {
+                    ll = setInterval(lauflicht, 100);
+                }
+            }
+
+            var previndex = 0;
+
+            function setled(index) {
+                var led = leds[index];
+                socket.emit('led', { addr: led.addr, port: led.port, val: 1 });
+                var prevled = leds[previndex];
+                socket.emit('led', { addr: prevled.addr, port: prevled.port, val: 0 });
+                previndex = index;
+            }
+
+            function setleddirect(index, on) {
+                var led = leds[index];
+                socket.emit('led', { addr: led.addr, port: led.port, val: (on ? 1 : 0) });
+            }
+
+            function toggleled(index) {
+                var led = leds[index];
+                led.on = !led.on;
+                socket.emit('led', { addr: led.addr, port: led.port, val: (led.on ? 1 : 0) });
+            }
+
+            window.addEventListener('load', function() {
+                var div = document.createElement('div');
+                for (var i = 0; i < leds.length; i++) {
+                    var led = leds[i];
+                    div.innerHTML += '<p><label>' + (i+1) + ': ' + led.addr + '/' + led.port + '<input type="checkbox" value="1" onchange="setleddirect(' + i + ',this.checked);"/></label></p>';
+                }
+                document.body.appendChild(div);
+                initAudio();
+            });
+        </script>
+        <style>
+            button { font-size: 40px; }
+            input[type=range] { width: 100%; margin: 40px 0; }
+            .image { width: 100%;position:relative; }
+            .image img { width: 100%; }
+            .image div { position:absolute;width:6%;height:12%;background-color: rgba(255,255,255,.4);border: 1px #fff solid; }
+        </style>
+    </head>
+    <body>
+        <audio id="musik" preload="metadata" controls="controls">
+            <source src="song.mp3" type="audio/mpeg">
+        </audio>
+        <div class="image">
+            <img src="armaturen.jpg"/>
+            <div style="top:49%;left:6%;" onclick="toggleled(0);"></div>
+            <div style="top:49%;left:31%;" onclick="toggleled(1);"></div>
+            <div style="top:62%;left:46%;" onclick="toggleled(2);"></div>
+            <div style="top:38%;left:68%;" onclick="toggleled(3);"></div>
+            <div style="top:49%;left:44%;" onclick="toggleled(4);"></div>
+            <div style="top:49%;left:50%;" onclick="toggleled(5);"></div>
+            <div style="top:51%;left:65%;" onclick="toggleled(6);"></div>
+            <div style="top:51%;left:71%;" onclick="toggleled(7);"></div>
+            <div style="top:20%;left:78%;" onclick="toggleled(8);"></div>
+            <div style="top:20%;left:86%;" onclick="toggleled(9);"></div>
+            <div style="top:48%;left:82%;" onclick="toggleled(10);"></div>
+            <div style="top:41%;left:88%;" onclick="toggleled(11);"></div>
+            <div style="top:64%;left:82%;" onclick="toggleled(12);"></div>
+            <div style="top:57%;left:88%;" onclick="toggleled(13);"></div>
+            <div style="top:79%;left:82%;" onclick="toggleled(14);"></div>
+            <div style="top:72%;left:88%;" onclick="toggleled(15);"></div>
+        </div>
+        <div>
+            <button onclick="toggleLauflicht()">Lauflicht</button>
+        </div>
+        <div>
+            <input type="range" min="0" max="47" oninput="setled(this.value);"/>
+        </div>
+    </body>
+</html>

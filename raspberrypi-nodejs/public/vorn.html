@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="web-audio-peak-meter.min.js"></script>
+        <script src="steuerung.js"></script>
+        <script>
+
+            var steuerung;
+
+            var leds = [
+                { addr: 5, port: 2, llidx: 0, audiolevel: 1., desc: 'Fernlicht rechts' },
+                { addr: 5, port: 3, llidx: 1, audiolevel: .9, desc: 'Abblendlicht rechts' },
+                { addr: 5, port: 4, llidx: 2, audiolevel: .8, desc: 'Standlicht rechts' },
+                { addr: 5, port: 5, llidx: 3, audiolevel: .7, desc: 'Blinker rechts' },
+                { addr: 5, port: 6, llidx: 4, audiolevel: .6, desc: 'Nebler rechts' },
+                { addr: 5, port: 7, llidx: 9, audiolevel: 1., desc: 'Fernlicht links' },
+                { addr: 5, port: 8, llidx: 8, audiolevel: .9, desc: 'Abblendlicht links' },
+                { addr: 5, port: 9, llidx: 7, audiolevel: .8, desc: 'Standlicht links' },
+                { addr: 5, port: 10, llidx: 6, audiolevel: .7, desc: 'Blinker links' },
+                { addr: 5, port: 11, llidx: 5, audiolevel: .6, desc: 'Nebler links' },
+            ];
+
+            window.addEventListener('load', function() {
+                var div = document.createElement('div');
+                for (var i = 0; i < leds.length; i++) {
+                    var led = leds[i];
+                    div.innerHTML += '<p><label>' + led.addr + '/' + led.port + ' - ' + led.desc + ' <input type="checkbox" value="1" onchange="steuerung.setleddirect(' + i + ',this.checked);"/></label></p>';
+                }
+                document.body.appendChild(div);
+                steuerung = Steuerung(document.getElementById('musik'), leds);
+            });
+
+        </script>
+        <style>
+            button { font-size: 40px; }
+            input[type=range] { width: 100%; margin: 40px 0; }
+            .image { width: 100%;position:relative; }
+            .image img { width: 100%; }
+            .image div { position:absolute;width:6%;height:12%;background-color: rgba(255,255,255,.4);border: 1px #fff solid; }
+        </style>
+    </head>
+    <body>
+        <audio id="musik" preload="metadata" controls="controls">
+            <source src="song.mp3" type="audio/mpeg">
+        </audio>
+        <div>
+            <button onclick="steuerung.toggleLauflicht()">Lauflicht</button>
+        </div>
+    </body>
+</html>

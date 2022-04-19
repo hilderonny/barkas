@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+
+            var leds = [
+            { addr: 3, port: 2 },
+            { addr: 3, port: 3 },
+            { addr: 3, port: 4 },
+            { addr: 3, port: 5 },
+            { addr: 3, port: 6 },
+            { addr: 3, port: 7 },
+            { addr: 3, port: 8 },
+            { addr: 3, port: 9 },
+            { addr: 3, port: 10 },
+            { addr: 3, port: 11 },
+            { addr: 3, port: 12 },
+            { addr: 3, port: 13 },
+            { addr: 3, port: 14 },
+            { addr: 3, port: 15 },
+            { addr: 3, port: 16 },
+            { addr: 3, port: 17 },
+            { addr: 4, port: 2 },
+            { addr: 4, port: 3 },
+            { addr: 4, port: 4 },
+            { addr: 4, port: 5 },
+            { addr: 4, port: 6 },
+            { addr: 4, port: 7 },
+            { addr: 4, port: 8 },
+            { addr: 4, port: 9 },
+            { addr: 4, port: 10 },
+            { addr: 4, port: 11 },
+            { addr: 4, port: 12 },
+            { addr: 4, port: 13 },
+            { addr: 4, port: 14 },
+            { addr: 4, port: 15 },
+            { addr: 4, port: 16 },
+            { addr: 4, port: 17 },
+            { addr: 5, port: 2 },
+            { addr: 5, port: 3 },
+            { addr: 5, port: 4 },
+            { addr: 5, port: 5 },
+            { addr: 5, port: 6 },
+            { addr: 5, port: 7 },
+            { addr: 5, port: 8 },
+            { addr: 5, port: 9 },
+            { addr: 5, port: 10 },
+            { addr: 5, port: 11 },
+            { addr: 5, port: 12 },
+            { addr: 5, port: 13 },
+            { addr: 5, port: 14 },
+            { addr: 5, port: 15 },
+            { addr: 5, port: 16 },
+            { addr: 5, port: 17 }
+            ];
+
+            var socket = io();
+
+
+            var onidx = 2;
+            var offidx = 1;
+            var onaddr = 3;
+            var offaddr = 3;
+
+            function lauflicht() {
+                onidx += 1;
+                if (onidx > 17) {
+                    onidx = 2;
+                    onaddr += 1;
+                    if (onaddr > 5) {
+                        onaddr = 3;
+                    }
+                }
+                socket.emit('led', { addr: onaddr, port: onidx, val: 1 });
+                offidx += 1;
+                if (offidx > 17) {
+                    offidx = 2;
+                    offaddr += 1;
+                    if (offaddr > 5) {
+                        offaddr = 3;
+                    }
+                }
+                socket.emit('led', { addr: offaddr, port: offidx, val: 0 });
+            }
+
+            var ll;
+            function toggleLauflicht() {
+                if (ll) {
+                    clearInterval(ll);
+                    ll = null;
+                } else {
+                    ll = setInterval(lauflicht, 50);
+                }
+            }
+
+            var previndex = 0;
+
+            function setled(index) {
+                var led = leds[index];
+                socket.emit('led', { addr: led.addr, port: led.port, val: 1 });
+                var prevled = leds[previndex];
+                socket.emit('led', { addr: prevled.addr, port: prevled.port, val: 0 });
+                previndex = index;
+            }
+
+            function setleddirect(index, on) {
+                var led = leds[index];
+                socket.emit('led', { addr: led.addr, port: led.port, val: (on ? 1 : 0) });
+            }
+
+            var schalterDiv;
+
+            async function schalterAbfragen() {
+                var schalter = await (await fetch('/inputs')).text();
+                schalterDiv.innerHTML = schalter;
+            }
+
+            window.addEventListener('load', function() {
+                var div = document.createElement('div');
+                for (var i = 0; i < leds.length; i++) {
+                    var led = leds[i];
+                    div.innerHTML += '<p><label>' + (i+1) + ': ' + led.addr + '/' + led.port + '<input type="checkbox" value="1" onchange="setleddirect(' + i + ',this.checked);"/></label></p>';
+                }
+                document.body.appendChild(div);
+                schalterDiv = document.getElementById('schalter');
+                setInterval(schalterAbfragen, 100);
+            });
+        </script>
+        <style>
+            button { font-size: 40px; }
+            input[type=range] { width: 100%; margin: 40px 0; }
+        </style>
+    </head>
+    <body>
+        <div id="schalter"></div>
+        <div>
+            <a href="armaturen.html">Armaturenbrett</a>
+        </div>
+        <div>
+            <a href="hinten.html">Hinten</a>
+        </div>
+        <div>
+            <a href="vorn.html">Vorn</a>
+        </div>
+        <div>
+            <a href="vornundhinten.html">Vorn und hinten</a>
+        </div>
+        <div>
+            <a href="alleszusammen.html">Alles zusammen</a>
+        </div>
+        <div>
+            <button onclick="toggleLauflicht()">Lauflicht</button>
+        </div>
+        <div>
+            <input type="range" min="0" max="47" oninput="setled(this.value);"/>
+        </div>
+    </body>
+</html>
